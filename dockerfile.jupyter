@@ -1,0 +1,21 @@
+FROM jupyter/pyspark-notebook:spark-3.4.1
+
+# Cambiar a root para instalar cosas
+USER root
+
+# Copiar requirements
+COPY requirements.txt /tmp/requirements.txt
+
+# Instalar paquetes desde el archivo requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --default-timeout=1000 --no-cache-dir \
+    -r /tmp/requirements.txt \
+    --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.0/constraints-3.12.txt" 
+
+RUN pip install --no-cache-dir --force-reinstall --upgrade pyspark==3.4.1
+
+# (Opcional) limpiar
+RUN rm /tmp/requirements.txt
+
+# Volver al usuario original
+USER $NB_UID
