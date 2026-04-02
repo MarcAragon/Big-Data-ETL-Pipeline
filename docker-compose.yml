@@ -239,6 +239,8 @@ services:
     volumes:
       - ./data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - network_fhbd_2026
 
   jupyter:
     build:
@@ -259,6 +261,8 @@ services:
     command: >
       jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
       --NotebookApp.token='' --NotebookApp.password=''
+    networks:
+      - network_fhbd_2026
 
   nessie:
     image: ghcr.io/projectnessie/nessie:latest #Ya con persistencia
@@ -282,6 +286,9 @@ services:
       - nessie.catalog.service.s3.default-options.region=us-east-1
       - nessie.server.authentication.enabled=false
       - nessie.rest.create.namespace.enabled=true
+    networks:
+      - network_fhbd_2026
+
 
   clickhouse:
     image: clickhouse/clickhouse-server:24.1
@@ -302,7 +309,8 @@ services:
         hard: 262144
     depends_on:
       - minio
-
+    networks:
+      - network_fhbd_2026
 volumes:
   postgres-db-volume:
   nessie-data:

@@ -5,7 +5,13 @@ from datetime import datetime
 from tasks.bronze_ingest import (
     run_comments_pipeline,
     run_posts_pipeline,
-    run_users_pipeline
+    run_users_pipeline,
+)
+
+from tasks.silver_transform import (
+    run_silver_users,
+    run_silver_comments,
+    run_silver_posts,
 )
 
 
@@ -36,4 +42,21 @@ with DAG(
         python_callable=run_users_pipeline,
     )
 
-    [comments_task, posts_task, users_task]
+    silver_users_task = PythonOperator(
+        task_id="silver_users_pipeline",
+        python_callable=run_silver_users,
+    )
+
+    silver_comments_task = PythonOperator(
+        task_id="silver_comments_pipeline",
+        python_callable=run_silver_comments,
+    )
+
+    silver_posts_task = PythonOperator(
+        task_id="silver_posts_pipeline",
+        python_callable=run_silver_posts,
+    )
+
+    users_task >> silver_users_task
+    comments_task >> silver_comments_task
+    posts_task >> silver_posts_task
