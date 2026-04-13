@@ -1,3 +1,5 @@
+#DAG AIRFLOW ORIGINAL
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
@@ -13,6 +15,7 @@ from tasks.silver_transform import (
     run_silver_comments,
     run_silver_posts,
 )
+from tasks.gold_agg import run as run_gold
 
 
 default_args = {
@@ -57,6 +60,17 @@ with DAG(
         python_callable=run_silver_posts,
     )
 
+    gold_task = PythonOperator(
+        task_id="gold_cant_post_x_user_hist",
+        python_callable=run_gold,
+    )
+
+
+     # Toda la Bronze debe completar antes de arrancar Silver
+     
     users_task >> silver_users_task
     comments_task >> silver_comments_task
     posts_task >> silver_posts_task
+
+    # Toda la Silver debe completar antes de arrancar Gold
+    [silver_users_task, silver_comments_task, silver_posts_task] >> gold_task

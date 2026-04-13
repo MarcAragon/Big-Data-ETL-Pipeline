@@ -37,6 +37,12 @@ RUN wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoo
     wget https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.24.8/bundle-2.24.8.jar && \
     wget https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/2.24.8/url-connection-client-2.24.8.jar
 
+# Iceberg AWS (necesario para S3FileIO)
+RUN wget https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws/1.5.0/iceberg-aws-1.5.0.jar
+
+# AWS SDK v2 S3 (necesario para Iceberg AWS)
+RUN wget https://repo1.maven.org/maven2/software/amazon/awssdk/s3/2.24.8/s3-2.24.8.jar
+
 # 4. Copiar configuración
 COPY spark-defaults.conf /opt/spark/conf/spark-defaults.conf
 
