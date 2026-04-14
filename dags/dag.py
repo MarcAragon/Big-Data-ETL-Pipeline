@@ -15,7 +15,7 @@ from tasks.silver_transform import (
     run_silver_comments,
     run_silver_posts,
 )
-from tasks.gold_agg import run as run_gold
+from tasks.gold_agg import run_gold
 
 
 default_args = {

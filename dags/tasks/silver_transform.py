@@ -24,18 +24,17 @@ COMMENTS_TABLE = f"{SILVER_NAMESPACE}.comments_hist"
 POSTS_TABLE = f"{SILVER_NAMESPACE}.posts_hist"
 
 # límites pequeños para prueba
-#USERS_LIMIT = 1000
-#COMMENTS_LIMIT = 1000
-#POSTS_LIMIT = 200
+USERS_LIMIT = 1000
+COMMENTS_LIMIT = 1000
+POSTS_LIMIT = 200
 
 
 def build_spark_session() -> SparkSession:
     conf = (
         pyspark.SparkConf()
         .setAppName("combined_spark_app")
-        .set("spark.master", "spark://spark-master:7077")
-        .set("spark.driver.memory", "512m")
-        .set("spark.executor.memory", "1g")
+        .set("spark.driver.memory", "8g")
+        .set("spark.executor.memory", "16g")
         .set("spark.sql.shuffle.partitions", "400")
         .set("spark.driver.maxResultSize", "4g")
         .set("spark.network.timeout", "800s")
@@ -51,10 +50,10 @@ def build_spark_session() -> SparkSession:
                 [
                     "org.postgresql:postgresql:42.7.3",
                     "org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.5.0",
-                    "org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.77.1",
+                    "org.projectnessie.nessie-integrations:nessie-spark-extensions-3.4_2.12:0.77.1",
                     "software.amazon.awssdk:bundle:2.24.8",
                     "software.amazon.awssdk:url-connection-client:2.24.8",
-                    "org.apache.hadoop:hadoop-aws:3.3.4",
+                    "org.apache.hadoop:hadoop-aws:3.2.0",
                 ]
             ),
         )
@@ -192,7 +191,7 @@ def run_silver_users() -> None:
     create_namespace_if_needed(spark)
 
     print("Leyendo users desde Bronze...")
-    df_users = spark.read.parquet(USERS_PATH)
+    df_users = spark.read.parquet(USERS_PATH).limit(USERS_LIMIT)
     df_users = transform_users(df_users)
 
     print(f"Haciendo MERGE sobre {USERS_TABLE}...")
@@ -207,8 +206,8 @@ def run_silver_comments() -> None:
     create_namespace_if_needed(spark)
 
     print("Leyendo comments desde Bronze...")
-    df_comments_2023 = spark.read.parquet(COMMENTS_2023_PATH)
-    df_comments_2024 = spark.read.parquet(COMMENTS_2024_PATH)
+    df_comments_2023 = spark.read.parquet(COMMENTS_2023_PATH).limit(COMMENTS_LIMIT)
+    df_comments_2024 = spark.read.parquet(COMMENTS_2024_PATH).limit(COMMENTS_LIMIT)
 
     df_comments_2023 = transform_comments(df_comments_2023)
     df_comments_2024 = transform_comments(df_comments_2024)
@@ -227,8 +226,8 @@ def run_silver_posts() -> None:
     create_namespace_if_needed(spark)
 
     print("Leyendo posts desde Bronze...")
-    df_posts_2023 = spark.read.parquet(POSTS_2023_PATH)
-    df_posts_2024 = spark.read.parquet(POSTS_2024_PATH)
+    df_posts_2023 = spark.read.parquet(POSTS_2023_PATH).limit(POSTS_LIMIT)
+    df_posts_2024 = spark.read.parquet(POSTS_2024_PATH).limit(POSTS_LIMIT)
 
     df_posts_2023 = transform_posts(df_posts_2023)
     df_posts_2024 = transform_posts(df_posts_2024)

@@ -350,3 +350,11 @@ if __name__ == "__main__":
     finally:
         spark.stop()
         log.info("SparkSession cerrada.")
+
+def run_gold():
+    spark = build_spark_session()
+    try:
+        run(spark)
+    finally:
+        spark.stop()
+        log.info("SparkSession cerrada.")

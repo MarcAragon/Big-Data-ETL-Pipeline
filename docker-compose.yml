@@ -265,9 +265,9 @@ services:
       - network_fhbd_2026
 
   nessie:
-    image: ghcr.io/projectnessie/nessie:latest #Ya con persistencia
+    image: ghcr.io/projectnessie/nessie:latest
     container_name: nessie
-    user: root                          # <-- solución directa
+    user: root
     ports:
       - "19120:19120"
     volumes:
@@ -276,14 +276,14 @@ services:
       - nessie.version.store.type=ROCKSDB
       - nessie.version.store.persist.rocks.database-path=/nessie/data
       - nessie.catalog.default-warehouse=warehouse
-      - nessie.catalog.warehouses.warehouse.location=s3://bucketproyecto/apiminio
-      - nessie.catalog.service.s3.default-options.endpoint=http://minio:9000/
-      - nessie.catalog.service.s3.default-options.access-key=urn:nessie-secret:quarkus:nessie.catalog.secrets.access-key
+      - nessie.catalog.warehouses.warehouse.location=s3://proyecto2/
+      - nessie.catalog.service.s3.default-options.endpoint=http://minio:9000
+      - nessie.catalog.service.s3.default-options.access-key=admin
+      - nessie.catalog.service.s3.default-options.secret-key=password
       - nessie.catalog.service.s3.default-options.path-style-access=true
       - nessie.catalog.service.s3.default-options.auth-type=STATIC
-      - nessie.catalog.secrets.access-key.name=admin
-      - nessie.catalog.secrets.access-key.secret=password
       - nessie.catalog.service.s3.default-options.region=us-east-1
+      - nessie.catalog.service.s3.default-options.connection.ssl.enabled=false
       - nessie.server.authentication.enabled=false
       - nessie.rest.create.namespace.enabled=true
     networks:
@@ -311,10 +311,37 @@ services:
       - minio
     networks:
       - network_fhbd_2026
+  
+  trino:
+    image: trinodb/trino:latest
+    container_name: trino
+    ports:
+      - "8085:8080"
+    depends_on:
+      - minio
+      - nessie
+    networks:
+      - network_fhbd_2026
+
+  dremio:
+    image: dremio/dremio-oss
+    container_name: dremio
+    ports:
+      - "9047:9047"
+      - "31010:31010"
+      - "45678:45678"
+    environment:
+      - DREMIO_JAVA_SERVER_EXTRA_OPTS=-Dpaths.dist=file:///opt/dremio/data/dist
+    volumes:
+      - dremio-data:/opt/dremio/data
+    networks:
+      - network_fhbd_2026
+
 volumes:
   postgres-db-volume:
   nessie-data:
   clickhouse_data:
+  dremio-data:
 
 
 networks:
